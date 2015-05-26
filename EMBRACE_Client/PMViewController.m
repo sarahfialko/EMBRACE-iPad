@@ -201,6 +201,18 @@ ConditionSetup *conditionSetup;
         [bookView stringByEvaluatingJavaScriptFromString:jsString];
     }
     
+    // Load the animator js file
+    NSString* animatorFilePath = [[NSBundle mainBundle] pathForResource:@"Animator" ofType:@"js"];
+    
+    if(animatorFilePath == nil) {
+        NSLog(@"Cannot find js file: Animator");
+    }
+    else {
+        NSData *animatorFileData = [NSData dataWithContentsOfFile:animatorFilePath];
+        NSString *animatorJsString = [[NSMutableString alloc] initWithData:animatorFileData encoding:NSUTF8StringEncoding];
+        [bookView stringByEvaluatingJavaScriptFromString:animatorJsString];
+    }
+    
     //Start off with no objects grouped together
     currentGroupings = [[NSMutableDictionary alloc] init];
     
@@ -297,6 +309,11 @@ ConditionSetup *conditionSetup;
             [playaudioClass playAudioFile:self:[NSString stringWithFormat:@"TheLopezFamilyS%dE.mp3",currentSentence]];
         }
     }
+    
+    
+    // Draw area (hard-coded for now)
+    [self drawArea:@"outside" forChapter:@"The Lopez Family"];
+    [self drawArea:@"aroundPaco" forChapter:@"Is Paco a Thief?"];
     
     //Perform setup for activity
     [self performSetupForActivity];
@@ -771,10 +788,76 @@ ConditionSetup *conditionSetup;
             
             [self incrementCurrentStep];
         }
+        else if([[currSolStep stepType] isEqualToString:@"animate"]) {
+            [self animateObject];
+            [self incrementCurrentStep];
+        }
+        else if ([[currSolStep stepType] isEqualToString:@"playSound"]) {
+            NSString * file = [currSolStep fileName];
+            [playaudioClass playAudioFile:file];
+            [self incrementCurrentStep];
+        }
+        
     }
     
     if([IntroductionClass.introductions objectForKey:chapterTitle] && [[IntroductionClass.performedActions objectAtIndex:INPUT] isEqualToString:@"next"]) {
         IntroductionClass.allowInteractions = FALSE;
+    }
+}
+
+/*
+ * Returns a CGPoint containing the x and y coordinates of the position of an object
+ */
+-(CGPoint) getObjectPosition:(NSString*)object {
+    NSArray* position;
+    
+    NSString* positionObject = [NSString stringWithFormat:@"getImagePosition(%@)", object];
+    NSString* positionString = [bookView stringByEvaluatingJavaScriptFromString:positionObject];
+    
+    if(![positionString isEqualToString:@""]) {
+        position = [positionString componentsSeparatedByString:@", "];
+    }
+    
+    return CGPointMake([position[0] floatValue], [position[1] floatValue]);
+}
+
+-(void) animateObject {
+    //Check solution only if it exists for the sentence
+    if (numSteps > 0) {
+        //Get steps for current sentence
+        NSMutableArray* currSolSteps = [PMSolution getStepsForSentence:currentSentence];
+        
+        //Get current step to be completed
+        ActionStep* currSolStep = [currSolSteps objectAtIndex:currentStep - 1];
+        
+        if ([[currSolStep stepType] isEqualToString:@"animate"]) {
+            //Get information for animation step type
+            NSString* object1Id = [currSolStep object1Id];
+            NSString* action = [currSolStep action];
+            NSString* waypointId = [currSolStep waypointId];
+            
+            CGPoint imageLocation = [self getObjectPosition:object1Id];
+            
+            //Calculate offset between top-left corner of image and the point clicked.
+            delta = [self calculateDeltaForMovingObjectAtPoint:imageLocation];
+            
+            //Change the location to accounting for the difference between the point clicked and the top-left corner which is used to set the position of the image.
+            CGPoint adjLocation = CGPointMake(imageLocation.x - delta.x, imageLocation.y - delta.y);
+            
+            CGPoint waypointLocation;
+            if ([waypointId isEqualToString:@""]) {
+                waypointLocation.x = 0;
+                waypointLocation.y = 0;
+            }
+            else {
+                Waypoint* waypoint = [model getWaypointWithId:waypointId];
+                waypointLocation = [self getWaypointLocation:waypoint];
+            }
+            
+            //Call the animateObject function in the js file.
+            NSString *animate = [NSString stringWithFormat:@"animateObject(%@, %f, %f, %f, %f, '%@')", object1Id, adjLocation.x, adjLocation.y, waypointLocation.x, waypointLocation.y, action];
+            [bookView stringByEvaluatingJavaScriptFromString:animate];
+        }
     }
 }
 
@@ -959,6 +1042,17 @@ ConditionSetup *conditionSetup;
                     //If the correct object was tapped, swap its image and increment the step
                     if ([self checkSolutionForSubject:imageAtPoint]) {
                         [self swapObjectImage];
+                        [self incrementCurrentStep];
+                    }
+                }
+                
+                else if ([[currSolStep stepType] isEqualToString:@"tapToAnimate"] ||
+                         [[currSolStep stepType] isEqualToString:@"shakeOrTap"]) {
+                    //Get the object at this point
+                    NSString* imageAtPoint = [self getObjectAtPoint:location ofType:nil];
+                    
+                    //If the correct object was tapped, increment the step
+                    if ([self checkSolutionForSubject:imageAtPoint]) {
                         [self incrementCurrentStep];
                     }
                 }
@@ -1203,43 +1297,57 @@ ConditionSetup *conditionSetup;
         //Current step is check and involves moving an object to a location
         if ([[currSolStep stepType] isEqualToString:@"check"]) {
             //Get information for check step type
-            NSString* objectId = [currSolStep object1Id];
-            NSString* action = [currSolStep action];
-            NSString* locationId = [currSolStep locationId];
+            //NSString* objectId = [currSolStep object1Id];
+            //NSString* action = [currSolStep action];
+            //NSString* locationId = [currSolStep locationId];
+            //NSString* waypointId = [currSolStep waypointId];
             
             //Get hotspot location of object
-            Hotspot* hotspot = [model getHotspotforObjectWithActionAndRole:objectId :action :@"subject"];
-            CGPoint hotspotLocation = [self getHotspotLocationOnImage:hotspot];
+            //Hotspot* hotspot = [model getHotspotforObjectWithActionAndRole:objectId :action :@"subject"];
+            //CGPoint hotspotLocation = [self getHotspotLocationOnImage:hotspot];
             
             //Get location that hotspot should be inside
-            Location* location = [model getLocationWithId:locationId];
+            //Location* location = [model getLocationWithId:locationId];
             
             //Calculate the x,y coordinates and the width and height in pixels from %
-            float locationX = [location.originX floatValue] / 100.0 * [bookView frame].size.width;
-            float locationY = [location.originY floatValue] / 100.0 * [bookView frame].size.height;
-            float locationWidth = [location.width floatValue] / 100.0 * [bookView frame].size.width;
-            float locationHeight = [location.height floatValue] / 100.0 * [bookView frame].size.height;
+            //float locationX = [location.originX floatValue] / 100.0 * [bookView frame].size.width;
+            //float locationY = [location.originY floatValue] / 100.0 * [bookView frame].size.height;
+            //float locationWidth = [location.width floatValue] / 100.0 * [bookView frame].size.width;
+            //float locationHeight = [location.height floatValue] / 100.0 * [bookView frame].size.height;
             
             //Calculate the center point of the location
-            float midX = locationX + (locationWidth / 2);
-            float midY = locationY + (locationHeight / 2);
-            CGPoint midpoint = CGPointMake(midX, midY);
+            //float midX = locationX + (locationWidth / 2);
+            //float midY = locationY + (locationHeight / 2);
+            //CGPoint midpoint = CGPointMake(midX, midY);
             
-            //Move the object to the center of the location
-            [self moveObject:objectId :midpoint :hotspotLocation :false : @"None"];
+            //Get position of waypoint in pixels based on the background size
+            //Waypoint* waypoint = [model getWaypointWithId:waypointId];
+            //CGPoint waypointLocation = [self getWaypointLocation:waypoint];
+            
+            //if ([locationId isEqualToString:@""]) {
+                //[self moveObject:objectId :waypointLocation :hotspotLocation :false : @"None"];
+            //}
+            //else {
+                //Move the object to the center of the location
+                //[self moveObject:objectId :midpoint :hotspotLocation :false : @"None"];
+            //}
             
             //Clear highlighting
-            NSString *clearHighlighting = [NSString stringWithFormat:@"clearAllHighlighted()"];
-            [bookView stringByEvaluatingJavaScriptFromString:clearHighlighting];
+            //NSString *clearHighlighting = [NSString stringWithFormat:@"clearAllHighlighted()"];
+            //[bookView stringByEvaluatingJavaScriptFromString:clearHighlighting];
             
             //Object should now be in the correct location, so the step can be incremented
-            if([self isHotspotInsideLocation]) {
+            //if([self isHotspotInsideLocation] || [self isHotspotInsideArea]) {
                 [self incrementCurrentStep];
-            }
+            //}
         }
         //Current step is checkAndSwap and involves swapping an image
         else if ([[currSolStep stepType] isEqualToString:@"checkAndSwap"]) {
             [self swapObjectImage];
+            [self incrementCurrentStep];
+        }
+        //Current step involves tapping an image
+        else if ([[currSolStep stepType] isEqualToString:@"tapToAnimate"]) {
             [self incrementCurrentStep];
         }
         //Current step is either group, ungroup, disappear, or transference
@@ -1407,7 +1515,7 @@ ConditionSetup *conditionSetup;
                     
                     if ([[currSolStep stepType] isEqualToString:@"check"]) {
                         //Check if object is in the correct location
-                        if([self isHotspotInsideLocation]) {
+                        if([self isHotspotInsideLocation] || [self isHotspotInsideArea]) {
                             if ([IntroductionClass.introductions objectForKey:chapterTitle]) {
                                 /*Check to see if an object is at a certain location or is grouped with another object e.g. farmergetIncorralArea or farmerleadcow. These strings come from the solution steps */
                                 if([[IntroductionClass.performedActions objectAtIndex:INPUT] isEqualToString:[NSString stringWithFormat:@"%@%@%@",[currSolStep object1Id], [currSolStep action], [currSolStep locationId]]]
@@ -1447,6 +1555,30 @@ ConditionSetup *conditionSetup;
                                 //Record error for complexity
                                 [[pageStatistics objectForKey:currentPageId] addErrorForComplexity:(currentComplexity - 1)];
                             }
+                            
+                            if (allowSnapback) {
+                                //Snap the object back to its original location
+                                [self moveObject:movingObjectId :startLocation :CGPointMake(0, 0) :false : @"None"];
+                                //if incorrect location reset object to beginning of gesture
+                                
+                            }
+                        }
+                    }
+                    else if ([[currSolStep stepType] isEqualToString:@"shakeOrTap"]) {
+                        if([self areHotspotsInsideArea]) {
+                            [self incrementCurrentStep];
+                        }
+                        else {
+                            //gets hotspot id for logging
+                            NSString* locationId = [currSolStep locationId];
+                            //Logging added by James for User Move Object to object
+                            [[ServerCommunicationController sharedManager] logUserMoveObject:movingObjectId  : locationId:startLocation.x :startLocation.y :location.x :location.y :@"Move to Hotspot" :bookTitle :chapterTitle :currentPage :[NSString stringWithFormat: @"%lu", (unsigned long)currentSentence] :[NSString stringWithFormat: @"%lu", (unsigned long)currentStep]];
+                            
+                            //Logging added by James for user Move Object to Hotspot Incorrect
+                            [[ServerCommunicationController sharedManager] logComputerVerification:@"Move to Hotspot" :false : movingObjectId:bookTitle :chapterTitle :currentPage :[NSString stringWithFormat:@"%lu", (unsigned long)currentSentence] :[NSString stringWithFormat:@"%lu", (unsigned long)currentStep]];
+                            
+                            [playaudioClass playErrorNoise:bookTitle :chapterTitle :currentPage :currentSentence :currentStep];
+                            //[self playErrorNoise];
                             
                             if (allowSnapback) {
                                 //Snap the object back to its original location
@@ -2368,9 +2500,83 @@ ConditionSetup *conditionSetup;
             float locationWidth = [location.width floatValue] / 100.0 * [bookView frame].size.width;
             float locationHeight = [location.height floatValue] / 100.0 * [bookView frame].size.height;
             
+            //NSLog(@"Width: %f Height: %f", [bookView frame].size.width, [bookView frame].size.height);
+            
             //Check if hotspot is inside location
             if ((hotspotLocation.x < locationX + locationWidth) && (hotspotLocation.x > locationX)
                 && (hotspotLocation.y < locationY + locationHeight) && (hotspotLocation.y > locationY)) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
+/*
+ * Returns true if the hotspot of an object (for a check step type) is inside the correct area. Otherwise, returns false.
+ */
+-(BOOL) isHotspotInsideArea {
+    //Check solution only if it exists for the sentence
+    if (numSteps > 0) {
+        //Get steps for current sentence
+        NSMutableArray* currSolSteps = [PMSolution getStepsForSentence:currentSentence];
+        
+        //Get current step to be completed
+        ActionStep* currSolStep = [currSolSteps objectAtIndex:currentStep - 1];
+        
+        if ([[currSolStep stepType] isEqualToString:@"check"]) {
+            //Get information for check step type
+            NSString* objectId = [currSolStep object1Id];
+            NSString* action = [currSolStep action];
+            
+            NSString* areaId = [currSolStep areaId];
+            
+            //Get hotspot location of correct subject
+            Hotspot* hotspot = [model getHotspotforObjectWithActionAndRole:objectId :action :@"subject"];
+            CGPoint hotspotLocation = [self getHotspotLocation:hotspot];
+            
+            //Get area that hotspot should be inside
+            Area* area = [model getAreaWithId:areaId];
+            
+            if ([area.aPath containsPoint:hotspotLocation])
+            {
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
+
+/*
+ * Returns true if the start location and the end location of an object are within the same area. Otherwise, returns false.
+ */
+-(BOOL) areHotspotsInsideArea {
+    //Check solution only if it exists for the sentence
+    if (numSteps > 0) {
+        //Get steps for current sentence
+        NSMutableArray* currSolSteps = [PMSolution getStepsForSentence:currentSentence];
+        
+        //Get current step to be completed
+        ActionStep* currSolStep = [currSolSteps objectAtIndex:currentStep - 1];
+        
+        if ([[currSolStep stepType] isEqualToString:@"shakeOrTap"]) {
+            //Get information for check step type
+            NSString* objectId = [currSolStep object1Id];
+            NSString* action = [currSolStep action];
+            
+            NSString* areaId = [currSolStep areaId];
+            
+            //Get hotspot location of correct subject
+            Hotspot* hotspot = [model getHotspotforObjectWithActionAndRole:objectId :action :@"subject"];
+            CGPoint hotspotLocation = [self getHotspotLocation:hotspot];
+            
+            //Get area that hotspot should be inside
+            Area* area = [model getAreaWithId:areaId];
+            
+            if ([area.aPath containsPoint:hotspotLocation] && [area.aPath containsPoint:startLocation])
+            {
                 return true;
             }
         }
@@ -4225,6 +4431,22 @@ ConditionSetup *conditionSetup;
     
     //Logging Added by James for Menu Display
     [[ServerCommunicationController sharedManager] logComputerDisplayMenuItems : menuItemInteractions : menuItemImages : menuItemRelationships : bookTitle :chapterTitle :currentPage :[NSString stringWithFormat:@"%lu", (unsigned long)currentSentence] :[NSString stringWithFormat:@"%lu", (unsigned long)currentStep]];
+}
+
+- (BOOL)webView:(UIWebView *)webView2
+shouldStartLoadWithRequest:(NSURLRequest *)request
+ navigationType:(UIWebViewNavigationType)navigationType {
+    
+    NSString *requestString = [[[request URL] absoluteString] stringByReplacingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
+    //NSLog(requestString);
+    
+    if ([requestString hasPrefix:@"ios-log:"]) {
+        NSString* logString = [[requestString componentsSeparatedByString:@":#iOS#"] objectAtIndex:1];
+        NSLog(@"UIWebView console: %@", logString);
+        return NO;
+    }
+    
+    return YES;
 }
 
 @end

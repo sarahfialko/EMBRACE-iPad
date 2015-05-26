@@ -18,6 +18,8 @@
 @synthesize locationId;
 @synthesize waypointId;
 @synthesize action;
+@synthesize areaId;
+@synthesize fileName;
 
 - (id) initAsSetupStep:(NSString*)type :(NSString*)obj1Id :(NSString*) obj2Id :(NSString*)act {
     if(self = [super init]) {
@@ -30,7 +32,7 @@
     return self;
 }
 
-- (id) initAsSolutionStep:(NSUInteger)sentNum :(NSUInteger)stepNum :(NSString*)type :(NSString*)obj1Id :(NSString*) obj2Id :(NSString*)loc :(NSString*)waypt :(NSString*)act {
+- (id) initAsSolutionStep:(NSUInteger)sentNum :(NSUInteger)stepNum :(NSString*)type :(NSString*)obj1Id :(NSString*) obj2Id :(NSString*)loc :(NSString*)waypt :(NSString*)act :(NSString*)area :(NSString*)file {
     if(self = [super init]) {
         sentenceNumber = sentNum;
         stepNumber = stepNum;
@@ -40,6 +42,8 @@
         locationId = loc;
         waypointId = waypt;
         action = act;
+        areaId = area;
+        fileName = file;
     }
     
     return self;
