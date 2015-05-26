@@ -3362,7 +3362,7 @@ ConditionSetup *conditionSetup;
                                 IMViewMenu = [[UIView alloc] initWithFrame:[bookView frame]];
                                 //[menu addGestureRecognizer:tapRecognizer];
                                 IMViewMenu.backgroundColor = [UIColor whiteColor];
-                                UILabel *IMinstructions = [[UILabel alloc] initWithFrame:CGRectMake(200, 10, 600, 40)];
+                                UILabel *IMinstructions = [[UILabel alloc] initWithFrame:CGRectMake(300, 20, 600, 100)];
                                 IMinstructions.text = @"Select the menu option that best matches what you imagined.";
                                 IMinstructions.textColor = [UIColor blackColor];
                                 

@@ -982,7 +982,7 @@ DDXMLElement *nodeStudy;
  Input: displayed menu items
  Context: story, chapter, page, sentence, step, username, condition, experimenter
  */
-- (void) logMenuSelection : (int) selectedMenuItemID : (NSArray *) displayedMenuInteractions :(NSArray *)displayedMenuImages : (NSArray *) menuRelationships : (NSString *) computerActionValue : (NSString *) storyValue : (NSString *) pageValue : (NSString *) chapterValue : (NSString *) sentenceValue : (NSString *) stepValue
+- (void) logMenuSelection : (int) selectedMenuItemID : (NSArray *) displayedMenuInteractions :(NSArray *)displayedMenuImages : (NSArray *) menuRelationships : (NSString *) computerActionValue : (NSString *) storyValue : (NSString *) chapterValue : (NSString *) pageValue :  (NSString *) sentenceValue : (NSString *) stepValue
 {
     UserActionIDTag++;
     
@@ -1115,7 +1115,7 @@ DDXMLElement *nodeStudy;
 }
 
 //logging user word presses
--(void) logUserPressWord : (NSString *) selectedWordID : (NSString *) computerActionValue : (NSString *) storyValue : (NSString *) pageValue : (NSString *) chapterValue : (NSString *) sentenceValue : (NSString *) stepValue
+-(void) logUserPressWord : (NSString *) selectedWordID : (NSString *) computerActionValue : (NSString *) storyValue : (NSString *) chapterValue : (NSString *) pageValue  : (NSString *) sentenceValue : (NSString *) stepValue
 {
     
     UserActionIDTag++;
@@ -1153,7 +1153,7 @@ DDXMLElement *nodeStudy;
     [nodeUserAction addChild:nodeContext];
 }
 
--(void) logUserEmergencyNext :(NSString *) computerActionValue : (NSString *) storyValue : (NSString *) pageValue : (NSString *) chapterValue : (NSString *) sentenceValue : (NSString *) stepValue
+-(void) logUserEmergencyNext :(NSString *) computerActionValue : (NSString *) storyValue : (NSString *) chapterValue : (NSString *) pageValue : (NSString *) sentenceValue : (NSString *) stepValue
 {
     
     UserActionIDTag++;
