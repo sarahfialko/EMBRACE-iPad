@@ -23,13 +23,6 @@ var increment;
 
 var paths = {};
 
-var movRadius = 50; // outer radius
-var factor = 1;	// slipping/sliding factor
-var w = 1;	// angular velocity in radians per second
-var dt = 30/1000; // timestep = 1/FPS
-var vel = factor*movRadius*w;	// v = r w
-var angle = 0;
-
 function Path(name){
     this.pathRadius = 20;
     this.pathName = name;
@@ -67,6 +60,13 @@ function AnimationObject(object, posX, posY, endX, endY, animName, pathToFollow)
     //this.width = object.offsetWidth * 100 / canvas.width;
     //this.height = object.offsetHeight * 100 / canvas.height;
     this.pathToFollow = pathToFollow;
+    
+    this.cirRadius = 25;
+    this.slFactor = 1;
+    this.angVel = 1;
+    this.linVel = this.cirRadius * this.slFactor * this.angVel;
+    this.angle = 0;
+    this.timestep = 30/1000;
 }
 
 function animateObject(objectName, posX, posY, endX, endY, animName, pathToFollow) {
@@ -687,14 +687,15 @@ function CubicN(pct, a, b, c, d) {
 }
 
 function roll(aniObject) {
-    aniObject.location.x += vel*dt;
-	angle += w*dt;
+    aniObject.location.x += aniObject.linVel * aniObject.timestep;
+	aniObject.angle += aniObject.angVel * aniObject.timestep;
 	animCtx.clearRect(0, 0, animCanvas.width, animCanvas.height);
 	animCtx.save();
 	animCtx.translate(aniObject.location.x, aniObject.location.y);
-	animCtx.rotate(angle);
+	animCtx.rotate(aniObject.angle);
 	animCtx.translate(-aniObject.location.x, -aniObject.location.y);
-    animCtx.drawImage(aniObject.object,aniObject.location.x,aniObject.location.y);
+    // Image width and height hard-coded for now for the lava image
+    animCtx.drawImage(aniObject.object,aniObject.location.x,aniObject.location.y, 40, 40);
 	animCtx.restore();
     document.getElementById('animation').style.zIndex = "100";
 }
