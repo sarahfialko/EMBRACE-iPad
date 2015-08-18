@@ -583,6 +583,29 @@ function checkEnding(aniObject) {
     }
 }
 
+function roll(aniObject) {
+    aniObject.location.x += aniObject.linVel * aniObject.timestep;
+	aniObject.angle += aniObject.angVel * aniObject.timestep;
+	animCtx.clearRect(0, 0, animCanvas.width, animCanvas.height);
+	animCtx.save();
+	animCtx.translate(aniObject.location.x, aniObject.location.y);
+	animCtx.rotate(aniObject.angle);
+	animCtx.translate(-aniObject.location.x, -aniObject.location.y);
+    // Image width and height hard-coded for now for the lava image
+    animCtx.drawImage(aniObject.object,aniObject.location.x,aniObject.location.y, 40, 40);
+	animCtx.restore();
+    document.getElementById('animation').style.zIndex = "100";
+    wrap(aniObject);
+}
+
+function wrap(aniObject) {
+    // The wrap value is hard-coded for now
+    if(aniObject.location.x > 578) {
+        aniObject.location.x = aniObject.ix;
+        aniObject.location.y = aniObject.iy;
+    }
+}
+
 // Debug
 // Use console.log(message); message is of type string
 console = new Object();
@@ -599,103 +622,3 @@ console.debug = console.log;
 console.info = console.log;
 console.warn = console.log;
 console.error = console.log;
-
-// draw the current frame based on sliderValue
-function follow2(aniObject) {
-    
-    //console.log("ESTE ES P: " + percentage);
-    // set the animation position (0-100)
-    increment += 1;
-    console.log("increment: " + increment);
-    //console.log("ESTE ES P: " + percentage + " ESTE ES D: " + direction);
-    
-    //console.log("Distance: " + distance);
-    
-    var xy;
-    
-    if (increment < 100) {
-        var distance = Math.sqrt(Math.pow((path[followIndex+1][0]-path[followIndex][0]), 2) + Math.pow((path[followIndex+1][1]-path[followIndex][1]), 2) );
-        
-        var percent = increment / 99;
-        //var percent = increment/distance;
-    
-        console.log("X: " + path[followIndex][0] + " Y: " + path[followIndex][1]);
-        console.log("X+1: " + path[followIndex+1][0] + " Y+1: " + path[followIndex+1][1]);
-        
-        xy = getLineXYatPercent({
-                                x: path[followIndex][0],
-                                y: path[followIndex][1]
-                                }, {
-                                x: path[followIndex+1][0],
-                                y: path[followIndex+1][1]
-                                }, percent);
-        aniObject.x = xy.x;
-        aniObject.object.style.left = aniObject.x + "px";
-        aniObject.y = xy.y;
-        aniObject.object.style.top = aniObject.y + "px";
-        
-    }
-    else {
-        if (followIndex < pathIndex-1) {
-            console.log("ENTRO");
-            increment = 0;
-            followIndex++;
-        }
-        else {
-            cancelAnimationFrame(requestId);
-        }
-    }
-}
-
-// line: percent is 0-1
-function getLineXYatPercent(startPt, endPt, percent) {
-    var dx = endPt.x - startPt.x;
-    var dy = endPt.y - startPt.y;
-    var X = startPt.x + dx * percent;
-    var Y = startPt.y + dy * percent;
-    return ({
-            x: X,
-            y: Y
-            });
-}
-
-// quadratic bezier: percent is 0-1
-function getQuadraticBezierXYatPercent(startPt, controlPt, endPt, percent) {
-    var x = Math.pow(1 - percent, 2) * startPt.x + 2 * (1 - percent) * percent * controlPt.x + Math.pow(percent, 2) * endPt.x;
-    var y = Math.pow(1 - percent, 2) * startPt.y + 2 * (1 - percent) * percent * controlPt.y + Math.pow(percent, 2) * endPt.y;
-    return ({
-            x: x,
-            y: y
-            });
-}
-
-// cubic bezier percent is 0-1
-function getCubicBezierXYatPercent(startPt, controlPt1, controlPt2, endPt, percent) {
-    var x = CubicN(percent, startPt.x, controlPt1.x, controlPt2.x, endPt.x);
-    var y = CubicN(percent, startPt.y, controlPt1.y, controlPt2.y, endPt.y);
-    return ({
-            x: x,
-            y: y
-            });
-}
-
-// cubic helper formula at percent distance
-function CubicN(pct, a, b, c, d) {
-    var t2 = pct * pct;
-    var t3 = t2 * pct;
-    return a + (-a * 3 + pct * (3 * a - a * pct)) * pct + (3 * b + pct * (-6 * b + b * 3 * pct)) * pct + (c * 3 - c * 3 * pct) * t2 + d * t3;
-}
-
-function roll(aniObject) {
-    aniObject.location.x += aniObject.linVel * aniObject.timestep;
-	aniObject.angle += aniObject.angVel * aniObject.timestep;
-	animCtx.clearRect(0, 0, animCanvas.width, animCanvas.height);
-	animCtx.save();
-	animCtx.translate(aniObject.location.x, aniObject.location.y);
-	animCtx.rotate(aniObject.angle);
-	animCtx.translate(-aniObject.location.x, -aniObject.location.y);
-    // Image width and height hard-coded for now for the lava image
-    animCtx.drawImage(aniObject.object,aniObject.location.x,aniObject.location.y, 40, 40);
-	animCtx.restore();
-    document.getElementById('animation').style.zIndex = "100";
-}
