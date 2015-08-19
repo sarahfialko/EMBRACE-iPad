@@ -893,6 +893,11 @@ ConditionSetup *conditionSetup;
                             ActionStep* solutionStep = [[ActionStep alloc] initAsSolutionStep:sentenceNum :stepNum :stepType :obj1Id :nil :locationId :nil :action :areaId :nil];
                             [PMSolution addSolutionStep:solutionStep];
                         }
+                        
+                        else if([[step name] isEqualToString:@"cancelAnimation"]) {
+                            ActionStep* solutionStep = [[ActionStep alloc] initAsSolutionStep:sentenceNum :stepNum :stepType :obj1Id :nil :nil :nil :action :nil :nil];
+                            [PMSolution addSolutionStep:solutionStep];
+                        }
                     }
                 }
             }

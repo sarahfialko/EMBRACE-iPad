@@ -15,6 +15,11 @@
                     <animate obj1Id="lava" action="rollAnimation" waypointId="" areaId=""/>
                 </step>
             </sentence>
+            <sentence number="4">
+                <step number="1">
+                    <cancelAnimation obj1Id="lava" action="rollAnimation" waypointId="" areaId=""/>
+                </step>
+            </sentence>
         </story>
     </solutions>
 </metadata>

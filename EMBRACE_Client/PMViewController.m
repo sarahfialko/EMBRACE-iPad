@@ -703,6 +703,11 @@ BOOL wasPathFollowed = false;
             [self hideImage];
             [self incrementCurrentStep];
         }
+        else if ([[currSolStep stepType] isEqualToString:@"cancelAnimation"]) {
+            NSString* imageAtPoint = [currSolStep object1Id];
+            [self cancelAnimation:imageAtPoint];
+            [self incrementCurrentStep];
+        }
     }
     
     if([IntroductionClass.introductions objectForKey:chapterTitle] && [[IntroductionClass.performedActions objectAtIndex:INPUT] isEqualToString:@"next"]) {
@@ -1401,9 +1406,7 @@ BOOL wasPathFollowed = false;
                 startLocation = CGPointMake(location.x - delta.x, location.y - delta.y);
                 
                 if ([animatingObjects objectForKey:imageAtPoint] && [[animatingObjects objectForKey:imageAtPoint]  isEqual: @YES]) {
-                    //Call the cancelAnimation function in the js file.
-                    NSString *cancelAnimate = [NSString stringWithFormat:@"cancelAnimation('%@')", imageAtPoint];
-                    [bookView stringByEvaluatingJavaScriptFromString:cancelAnimate];
+                    [self cancelAnimation:imageAtPoint];
                     [animatingObjects setObject:@NO forKey:imageAtPoint];
                 }
             }
@@ -1737,6 +1740,12 @@ BOOL wasPathFollowed = false;
             }
         }
     }
+}
+
+-(void)cancelAnimation:(NSString*)imageAtPoint {
+    //Call the cancelAnimation function in the js file.
+    NSString *cancelAnimate = [NSString stringWithFormat:@"cancelAnimation('%@')", imageAtPoint];
+    [bookView stringByEvaluatingJavaScriptFromString:cancelAnimate];
 }
 
 -(UIColor *)generateRandomColor {
