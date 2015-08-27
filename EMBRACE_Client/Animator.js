@@ -595,14 +595,15 @@ function roll(aniObject) {
     animCtx.drawImage(aniObject.object,aniObject.location.x,aniObject.location.y, 40, 40);
 	animCtx.restore();
     document.getElementById('animation').style.zIndex = "100";
-    wrap(aniObject);
+    checkEndingForRoll(aniObject);
 }
 
-function wrap(aniObject) {
-    // The wrap value is hard-coded for now
+function checkEndingForRoll(aniObject) {
+    // The ending value is hard-coded for now, it should be gotten from the ending waypoint for the object
     if(aniObject.location.x > 578) {
-        aniObject.location.x = aniObject.ix;
-        aniObject.location.y = aniObject.iy;
+        //aniObject.location.x = aniObject.ix;
+        //aniObject.location.y = aniObject.iy;
+        cancelAnimationFrame(requestId);
     }
 }
 
