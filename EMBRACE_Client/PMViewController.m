@@ -218,6 +218,30 @@ BOOL wasPathFollowed = false;
         [bookView stringByEvaluatingJavaScriptFromString:vectorJsString];
     }
     
+    // Load the vector js file
+    NSString* spriteAnimatorFilePath = [[NSBundle mainBundle] pathForResource:@"SpriteAnimator" ofType:@"js"];
+    
+    if(spriteAnimatorFilePath == nil) {
+        NSLog(@"Cannot find js file: SpriteAnimator");
+    }
+    else {
+        NSData *spriteAnimatorFileData = [NSData dataWithContentsOfFile:spriteAnimatorFilePath];
+        NSString *spriteAnimatorJsString = [[NSMutableString alloc] initWithData:spriteAnimatorFileData encoding:NSUTF8StringEncoding];
+        [bookView stringByEvaluatingJavaScriptFromString:spriteAnimatorJsString];
+    }
+    
+    // Load the jquery library file
+    NSString* jqueryFilePath = [[NSBundle mainBundle] pathForResource:@"jquery-2.1.4.min" ofType:@"js"];
+    
+    if(jqueryFilePath == nil) {
+        NSLog(@"Cannot find js file: jquery-2.1.4.min");
+    }
+    else {
+        NSData *jqueryFileData = [NSData dataWithContentsOfFile:jqueryFilePath];
+        NSString *jqueryJsString = [[NSMutableString alloc] initWithData:jqueryFileData encoding:NSUTF8StringEncoding];
+        [bookView stringByEvaluatingJavaScriptFromString:jqueryJsString];
+    }
+    
     //Start off with no objects grouped together
     currentGroupings = [[NSMutableDictionary alloc] init];
 
@@ -332,6 +356,17 @@ BOOL wasPathFollowed = false;
     
     //Perform setup for activity
     [self performSetupForActivity];
+    
+    if ([chapterTitle isEqualToString:@"Getting Ready"] && ([currentPageId rangeOfString:@"PM-1"].location != NSNotFound)) {
+        
+        //Load image using alternative src
+        //NSString* loadImage = [NSString stringWithFormat:@"loadImage('%@', '%@', '%@', %f, %f, '%@', %d)", @"ball", @"roll_spritesheet.png", @"140px", 16.0f, 32.0f, @"manipulationObject", 3];
+        //[bookView stringByEvaluatingJavaScriptFromString:loadImage];
+        
+        //Call the animateObject function in the js file.
+        NSString *animateSprite = [NSString stringWithFormat:@"loadSpriteSheet()"];
+        [bookView stringByEvaluatingJavaScriptFromString:animateSprite];
+    }
 }
 
 -(void) drawArea : (NSString *) areaName : (NSString *) chapter : (NSString *) pageId {
@@ -772,8 +807,11 @@ BOOL wasPathFollowed = false;
             //NSString *showPath = @"showPath()";
             //[bookView stringByEvaluatingJavaScriptFromString:showPath];
             
+            float waypointX = [[NSString stringWithFormat:@"%.0f",waypointLocation.x]floatValue];
+            float waypointY = [[NSString stringWithFormat:@"%.0f",waypointLocation.y]floatValue];
+            
             //Call the animateObject function in the js file.
-            NSString *animate = [NSString stringWithFormat:@"animateObject(%@, %f, %f, %f, %f, '%@', '%@')", object1Id, adjLocation.x, adjLocation.y, waypointLocation.x, waypointLocation.y, action, areaId];
+            NSString *animate = [NSString stringWithFormat:@"animateObject(%@, %f, %f, %f, %f, '%@', '%@')", object1Id, adjLocation.x, adjLocation.y, waypointX, waypointY, action, areaId];
             [bookView stringByEvaluatingJavaScriptFromString:animate];
             
             animatingObjects = [[NSMutableDictionary alloc] init];
@@ -978,6 +1016,11 @@ BOOL wasPathFollowed = false;
                          [[currSolStep stepType] isEqualToString:@"shakeOrTap"]) {
                     //Get the object at this point
                     NSString* imageAtPoint = [self getObjectAtPoint:location ofType:nil];
+                    
+                    if([imageAtPoint isEqualToString:@"ball"]) {
+                        NSString *animateSprite = [NSString stringWithFormat:@"playAnimation()"];
+                        [bookView stringByEvaluatingJavaScriptFromString:animateSprite];
+                    }
                     
                     //If the correct object was tapped, increment the step
                     if ([self checkSolutionForSubject:imageAtPoint]) {

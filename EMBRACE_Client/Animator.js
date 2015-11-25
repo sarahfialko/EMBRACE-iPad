@@ -54,19 +54,19 @@ function AnimationObject(object, posX, posY, endX, endY, animName, pathToFollow)
     this.maxForce = 0.06;
     this.ax = 0;
     this.ay = 0;
-    this.location = createVector(this.x, this.y);
-    this.velocity = createVector(this.vx, this.vy);
-    this.acceleration = createVector(this.ax, this.ay);
-    //this.width = object.offsetWidth * 100 / canvas.width;
-    //this.height = object.offsetHeight * 100 / canvas.height;
-    this.pathToFollow = pathToFollow;
     
-    this.cirRadius = 25;
-    this.slFactor = 1;
-    this.angVel = 1;
-    this.linVel = this.cirRadius * this.slFactor * this.angVel;
-    this.angle = 0;
-    this.timestep = 30/1000;
+    //this.location = createVector(this.x, this.y);
+    //this.velocity = createVector(this.vx, this.vy);
+    //this.acceleration = createVector(this.ax, this.ay);
+
+//    this.pathToFollow = pathToFollow;
+    
+//    this.cirRadius = 25;
+//    this.slFactor = 1;
+//    this.angVel = 1;
+//    this.linVel = this.cirRadius * this.slFactor * this.angVel;
+//    this.angle = 0;
+ //   this.timestep = 30/1000;
 }
 
 function animateObject(objectName, posX, posY, endX, endY, animName, pathToFollow) {
@@ -79,7 +79,9 @@ function animateObject(objectName, posX, posY, endX, endY, animName, pathToFollo
     var animationObject = new AnimationObject(objectName, posX, posY, endX, endY, animName, pathToFollow);
     
     animatingObjects.push(animationObject);
-   
+    
+    console.log("LOGGING: " + animatingObjects[0].object);
+    
     animatingObjectsIndex++;
 
     animatingObjects[animatingObjectsIndex].tempY = animatingObjects[animatingObjectsIndex].y;

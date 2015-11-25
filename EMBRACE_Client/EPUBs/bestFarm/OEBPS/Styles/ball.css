@@ -1,0 +1,18 @@
+.ball {
+    position: absolute;
+    left: 40%;
+    top: 80%;
+    width: 140px;
+    height: 140px;
+    z-index: 2;
+    background-image: url("../Images/roll_spritesheet.png");
+}
+
+.roll {
+    -webkit-animation: roll 0.8s steps(8) infinite;
+}
+
+@-webkit-keyframes roll {
+    from { background-position: 0px; }
+    to { background-position: -1120px; }
+}

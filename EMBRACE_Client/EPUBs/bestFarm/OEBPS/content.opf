@@ -56,6 +56,7 @@
     <item href="toc.ncx" id="ncx" media-type="application/x-dtbncx+xml"/>
     <item href="Styles/IMStyle.css" id="IMStyle.css" media-type="text/css"/>
     <item href="Styles/PMStyle.css" id="PMStyle.css" media-type="text/css"/>
+    <item href="Styles/ball.css" id="ball.css" media-type="text/css"/>
     <item href="Styles/Stylesheet.css" id="Stylesheet.css" media-type="text/css"/>
     <item href="Images/apple_basket.png" id="apple_basket.png" media-type="image/png"/>
     <item href="Images/apple_large.png" id="apple_large.png" media-type="image/png"/>
@@ -87,6 +88,7 @@
     <item href="Images/pumpkin_large.png" id="pumpkin_large.png" media-type="image/png"/>
     <item href="Images/pumpkin_patch.png" id="pumpkin_patch.png" media-type="image/png"/>
     <item href="Images/sheep_large.png" id="sheep_large.png" media-type="image/png"/>
+    <item href="Images/roll_spritesheet.png" id="roll_spritesheet.png" media-type="image/png"/>
     <item href="Images/Story-1-The-Contest.png" id="Story-1-The-Contest.png" media-type="image/png"/>
     <item href="Images/Story-2-Getting-Ready.png" id="Story-2-Getting-Ready.png" media-type="image/png"/>
     <item href="Images/Story-3-Cleaning-Up.png" id="Story-3-Cleaning-Up.png" media-type="image/png"/>

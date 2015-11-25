@@ -22,7 +22,7 @@
     NSFileManager *fileManager = [NSFileManager defaultManager];
 
     //Remove old epub files. This is for debugging purposes only.
-    if(DEBUG) {
+    if(false) {
         NSError *error = nil;
         NSArray *directoryContents = [fileManager contentsOfDirectoryAtPath:documentsDirectory error:&error];
         if (error == nil) {
